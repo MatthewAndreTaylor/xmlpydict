@@ -22,3 +22,13 @@ s = """<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
 </svg>"""
 print(timeit.timeit(lambda: xmlpydict.parse(s), number=100))
 print(timeit.timeit(lambda: xmltodict.parse(s), number=100))
+
+import requests
+
+# Get a large sample XML file from the web (show the speed of both libraries is linear)
+url = "https://aiweb.cs.washington.edu/research/projects/xmltk/xmldata/data/tpc-h/part.xml"
+response = requests.get(url)
+s = response.text
+
+print(timeit.timeit(lambda: xmlpydict.parse(s), number=100))
+print(timeit.timeit(lambda: xmltodict.parse(s), number=100))

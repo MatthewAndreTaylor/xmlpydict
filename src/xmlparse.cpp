@@ -2,9 +2,10 @@
  * Copyright (c) 2023 Matthew Andre Taylor
  */
 #include <Python.h>
+#include <stdio.h>
 #include <string>
 #include <vector>
-#include <stdio.h>
+#include <map>
 
 typedef enum {
   PRIMITIVE,
@@ -26,6 +27,7 @@ typedef struct {
 } XMLNode;
 
 size_t i;
+size_t curr_id;
 
 #define PARSE_SUCCESS 1
 #define PARSE_FAILURE 0
@@ -263,22 +265,25 @@ static int parseCData(XMLNode *node, const char *xmlContent) {
 
 static int parseText(XMLNode *node, const char *xmlContent) {
   node->type = TEXT;
-  bool isSpace = false;
+  bool allSpace = true;
 
   while (xmlContent[i] != '\0' && xmlContent[i] != '<') {
     if (xmlContent[i] == '&' || xmlContent[i] == '>' || xmlContent[i] == '\"' || xmlContent[i] == '\'') {
       PyErr_Format(PyExc_Exception, "not well formed (violation at pos=%d)", i);
       return PARSE_FAILURE;
     }
-    if (isSpace || !std::isspace(xmlContent[i])) {
-      node->elementName.push_back(xmlContent[i]);
-      isSpace = true;
+    if (allSpace && !std::isspace(xmlContent[i])) {
+      allSpace = false;
     }
+
+    node->elementName.push_back(xmlContent[i]);
     i++;
   }
-  while (std::isspace(node->elementName.back())) {
-    node->elementName.pop_back();
+
+  if (allSpace) {
+    node->elementName.clear();
   }
+  
   return PARSE_SUCCESS;
 }
 
@@ -307,20 +312,26 @@ static int parseProlog(const char *xmlContent) {
 
 static std::vector<XMLNode> splitNodes(const char *xmlContent) {
   std::vector<XMLNode> nodes;
-  i = 0;
-  int parsing_state = PARSE_SUCCESS;
+  std::map<size_t, size_t> parentIdMap;
+  std::vector<size_t> idStack; 
 
-  parsing_state = parseProlog(xmlContent);
+  i = 0;
+  curr_id = 0;
+  idStack.push_back(curr_id);
+
+  int parsing_state = parseProlog(xmlContent);
   if (parsing_state == PARSE_FAILURE) {
     return nodes;
   }
 
   while (xmlContent[i] != '\0') {
     XMLNode node;
+    curr_id++;
     if (xmlContent[i] == '<') {
       i++;
       if (xmlContent[i] == '/') {
         parsing_state = parseContainerClose(&node, xmlContent);
+        idStack.pop_back();
       } else if (xmlContent[i] == '!') {
         if (xmlContent[i+1] == '[') {
           parsing_state = parseCData(&node, xmlContent);
@@ -329,9 +340,22 @@ static std::vector<XMLNode> splitNodes(const char *xmlContent) {
         }
       } else {
         parsing_state = parseContainerOpen(&node, xmlContent);
+        idStack.push_back(curr_id);
       }
     } else {
-      parsing_state = parseText(&node, xmlContent);
+      size_t parentId = idStack.back();
+
+      // Check if the parent already has a text node
+      if (parentIdMap.find(parentId) != parentIdMap.end()) {
+        XMLNode textNode = nodes[parentIdMap[parentId]];
+        parsing_state = parseText(&textNode, xmlContent);
+        nodes[parentIdMap[parentId]] = textNode;
+      } else {
+        parsing_state = parseText(&node, xmlContent);
+        if (!node.elementName.empty()) {
+         parentIdMap[parentId] = nodes.size(); 
+        }
+      }
     }
     if (parsing_state == PARSE_FAILURE) {
       return nodes;
@@ -342,6 +366,18 @@ static std::vector<XMLNode> splitNodes(const char *xmlContent) {
   }
 
   return nodes;
+}
+
+std::string strip(const std::string& s) {
+    size_t start = 0;
+    size_t end = s.length();
+    while (start < end && std::isspace(s[start])) {
+      ++start;
+    }
+    while (end > start && std::isspace(s[end - 1])) {
+      --end;
+    }
+    return s.substr(start, end - start);
 }
 
 static PyObject *createDict(const std::vector<Pair> &attributes, char* attributePrefix) {
@@ -389,12 +425,12 @@ static PyObject *xml_parse(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject *childKey = PyUnicode_FromString(node.elementName.c_str());
 
     if (node.type == TEXT) {
-      PyObject *item = PyDict_GetItemString(currDict, cdata_key);
-      if (item != NULL) {
-        PyDict_SetItemString(currDict, cdata_key, PyUnicode_Concat(item, childKey));
-      } else {
-        PyDict_SetItemString(currDict, cdata_key, childKey);
+      std::string text = strip(node.elementName);
+      if (text.empty()) {
+        continue;
       }
+      PyObject *val = PyUnicode_FromString(text.c_str());
+      PyDict_SetItemString(currDict, cdata_key, val);
     } else if (node.type == CONTAINER_OPEN || node.type == PRIMITIVE) {
       PyObject *d = createDict(node.attr, attributePrefix);
 

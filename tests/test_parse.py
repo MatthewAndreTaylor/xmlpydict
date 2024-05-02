@@ -21,7 +21,7 @@ def test_simple():
         "p": {"@width": "10", "@height": "20"}
     }
     assert parse("<p>Hey <b>bold</b>There</p>") == {
-        "p": {"#text": "HeyThere", "b": "bold"}
+        "p": {"#text": "Hey There", "b": "bold"}
     }
 
     assert (
@@ -303,7 +303,7 @@ def test_exception():
         ">",
         "<p>'Hello'</p>",
         "<p>Matt & Taylor</p>",
-        "<nested></p></nested>"
+        "<nested></p></nested>",
     ]
     for xml_str in xml_strings:
         with pytest.raises(Exception):
