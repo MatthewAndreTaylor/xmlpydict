@@ -30,8 +30,8 @@ pip install xmlpydict
 
 Create a consistent parsing strategy between XML and Python dictionaries using the specification found [here](https://www.xml.com/pub/a/2006/05/31/converting-between-xml-and-json.html). `xmlpydict` focuses on speed; see the benchmarks below.
 
-<img width="1280" height="960" alt="small_xml_document" src="https://github.com/user-attachments/assets/0248a408-6bb6-4790-bd0f-f90537e2f21a" />
-<img width="1280" height="960" alt="large_xml_document" src="https://github.com/user-attachments/assets/539a2a69-f475-46a5-bffc-1e8805a5a5e7" />
+<img width="200" alt="small_xml_document" src="https://github.com/user-attachments/assets/0248a408-6bb6-4790-bd0f-f90537e2f21a" />
+<img width="200" alt="large_xml_document" src="https://github.com/user-attachments/assets/539a2a69-f475-46a5-bffc-1e8805a5a5e7" />
 
 
 ### xmlpydict supports the following 
