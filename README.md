@@ -1,12 +1,12 @@
 # xmlpydict 📑
 
 [![XML Tests](https://github.com/MatthewAndreTaylor/xml-to-pydict/actions/workflows/tests.yml/badge.svg)](https://github.com/MatthewAndreTaylor/xml-to-pydict/actions/workflows/tests.yml)
-[![PyPI versions](https://img.shields.io/badge/python-3.7%2B-blue)](https://github.com/MatthewAndreTaylor/xml-to-pydict)
+[![PyPI versions](https://img.shields.io/badge/python-3.8%2B-blue)](https://github.com/MatthewAndreTaylor/xml-to-pydict)
 [![PyPI](https://img.shields.io/pypi/v/xmlpydict.svg)](https://pypi.org/project/xmlpydict/)
 
 ## Requirements
 
-- `python 3.7+`
+- `python 3.8+`
 
 ## Installation
 
