@@ -28,12 +28,7 @@ pip install xmlpydict
 
 ## Goals
 
-Create a consistent parsing strategy between XML and Python dictionaries. xmlpydict takes a more laid-back approach to enforce the syntax of XML. However, still ensures fast speeds by using finite automata.
-
-## Features
-
-xmlpydict allows for multiple root elements.
-The root object is treated as the Python object.
+Create a consistent parsing strategy between XML and Python dictionaries using the specification found [here](https://www.xml.com/pub/a/2006/05/31/converting-between-xml-and-json.html). `xmlpydict` focuses on speed; see the benchmarks below.
 
 ### xmlpydict supports the following 
 
@@ -45,19 +40,15 @@ The root object is treated as the Python object.
 
 [Characters](https://www.w3.org/TR/xml/#charsets):  Similar to CDATA text is stored as {'#text': Char} , however this text is stripped.
 
-### dict.get(key[, default]) will not cause exceptions
-
 ```py
 # Empty tags are containers
 >>> from xmlpydict import parse
 >>> parse("<a></a>")
-{'a': {}}
+{'a': None}
 >>> parse("<a/>")
-{'a': {}}
+{'a': None}
 >>> parse("<a/>").get('href')
 None
->>> parse("")
-{}
 ```
 
 ### Attribute prefixing
@@ -76,7 +67,7 @@ None
 # Grammar and structure of the xml_content is checked while parsing
 >>> from xmlpydict import parse
 >>> parse("<a></ a>")
-Exception: not well formed (violation at pos=5)
+xml.parsers.expat.ExpatError: not well-formed (invalid token): line 1, column 5
 ```
 
 

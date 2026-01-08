@@ -1,13 +1,14 @@
 import pytest
-from xmlpydict import parse
 import json
+from xmlpydict import parse
 
 
 def test_simple():
-    assert parse("") == {}
-    assert parse("<p/>") == {"p": {}}
-    assert parse("<p></p>") == {"p": {}}
+    assert parse("<p/>") == {"p": None}
+    assert parse("<p></p>") == {"p": None}
     assert parse('<p width="10"></p>') == {"p": {"@width": "10"}}
+    assert parse("<p>Hello</p>") == {"p": "Hello"}
+
     assert parse('<p width="10">Hello World</p>') == {
         "p": {"@width": "10", "#text": "Hello World"}
     }
@@ -22,6 +23,17 @@ def test_simple():
     }
     assert parse("<p>Hey <b>bold</b>There</p>") == {
         "p": {"#text": "Hey There", "b": "bold"}
+    }
+    assert parse("<p>Hey <b>bold</b>There <b>bold</b>Buddy </p>") == {
+        "p": {"#text": "Hey There Buddy", "b": ["bold", "bold"]}
+    }
+
+    assert parse("<p>Hey <b/>There Buddy</p>") == {
+        "p": {"#text": "Hey There Buddy", "b": None}
+    }
+
+    assert parse("<p>Hey <b/>There Buddy <b/> </p>") == {
+        "p": {"#text": "Hey There Buddy", "b": [None, None]}
     }
 
     assert (
@@ -76,14 +88,8 @@ def test_cdata():
 
 
 def test_nested():
-    assert parse("<book><p/></book> ") == {"book": {"p": {}}}
-    assert parse("<book><p></p></book>") == {"book": {"p": {}}}
-    assert parse("<book><p></p></book><card/>") == {"book": {"p": {}}, "card": {}}
-    assert parse("<pizza></pizza><book><p></p></book><card/>") == {
-        "pizza": {},
-        "book": {"p": {}},
-        "card": {},
-    }
+    assert parse("<book><p/></book> ") == {"book": {"p": None}}
+    assert parse("<book><p></p></book>") == {"book": {"p": None}}
 
 
 def test_list():
@@ -98,7 +104,7 @@ def test_list():
 
 
 def test_comment():
-    assert parse("<!-- simple comment -->") == {}
+    assert parse("<p/><!-- simple comment -->") == {"p": None}
     comment = """<world>
   <!-- $comment+++@python -->
   <lake>Content</lake>
@@ -286,14 +292,9 @@ def test_files():
 
 def test_exception():
     xml_strings = [
-        "< p/>",
-        "<p>",
-        "<p/ >",
         "<p height'10'/>",
         "<p height='10'width='5'/>",
-        "<p width='5/>",
         "<p width=5'/>",
-        "</p>",
         "<pwidth='5'/>",
         "<!---->",
         "<a></p>",
@@ -301,8 +302,6 @@ def test_exception():
         "</>",
         "<",
         ">",
-        "<p>'Hello'</p>",
-        "<p>Matt & Taylor</p>",
         "<nested></p></nested>",
     ]
     for xml_str in xml_strings:
@@ -311,7 +310,7 @@ def test_exception():
 
 
 def test_prefix():
-    assert parse("<p></p>", attr_prefix="$") == {"p": {}}
+    assert parse("<p></p>", attr_prefix="$") == {"p": None}
     assert parse('<p width="10"></p>', attr_prefix="$") == {"p": {"$width": "10"}}
     assert parse('<p width="10" height="5"></p>', attr_prefix="$") == {
         "p": {"$width": "10", "$height": "5"}

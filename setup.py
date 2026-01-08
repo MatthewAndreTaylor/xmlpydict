@@ -16,8 +16,8 @@ class build_ext(build_ext_orig):
 setup(
     include_package_data=True,
     ext_modules=[
-        Extension("xmlpydict", ["src/xmlparse.cpp"]),
+        Extension("pyxmlhandler", ["src/xmlparse.cpp"]),
     ],
     cmdclass={"build_ext": build_ext},
-    package_data={"xmlpydict": ["py.typed"], "": ["xmlpydict.pyi"]},
+    packages=["xmlpydict"],
 )
