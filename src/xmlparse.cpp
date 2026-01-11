@@ -3,7 +3,7 @@
  */
 #include <Python.h>
 #include <stdio.h>
-#include <string>
+#include <cctype>
 #include <vector>
 
 static PyObject* strip(PyObject* s_obj) {
