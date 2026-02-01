@@ -40,6 +40,36 @@ def parse_file(file_path, attr_prefix: str = "@", cdata_key: str = "#text") -> d
     parser.CharacterDataHandler = handler.characters
     parser.StartElementHandler = handler.startElement
     parser.EndElementHandler = handler.endElement
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "rb") as f:
         parser.ParseFile(f)
     return handler.item
+
+
+
+def iter_xml_documents(file_path, chunk_size=64 * 1024):
+    start_token = b"<?xml"
+    buffer = b""
+    with open(file_path, "rb") as f:
+        while True:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                if buffer.strip():
+                    yield buffer
+                break
+            buffer += chunk
+            while True:
+                start_index = buffer.find(start_token, 1)
+                if start_index == -1:
+                    break
+                yield buffer[:start_index]
+                buffer = buffer[start_index:]
+            
+            
+
+def parse_xml_collections(file_path, attr_prefix: str = "@", cdata_key: str = "#text"):
+    for xml_content in iter_xml_documents(file_path):
+        yield parse(
+            xml_content.decode("utf-8"),
+            attr_prefix=attr_prefix,
+            cdata_key=cdata_key
+        )
