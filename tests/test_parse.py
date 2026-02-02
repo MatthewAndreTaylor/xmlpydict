@@ -1,6 +1,6 @@
 import pytest
 import json
-from xmlpydict import parse
+from xmlpydict import parse, parse_file
 
 
 def test_simple():
@@ -335,6 +335,38 @@ def test_document():
   </project>
 </repository>"""
     assert parse(s) == {
+        "repository": {
+            "project": [
+                {
+                    "@pypi": "xmlpydict",
+                    "title": "XML document parser",
+                    "author": "Matthew Taylor",
+                },
+                {
+                    "@pypi": "blank",
+                    "title": "Test project",
+                    "author": "Matthew Taylor",
+                },
+            ]
+        }
+    }
+
+
+def test_parse_file(tmp_path):
+    s = """<?xml version="1.0" encoding="UTF-8"?><repository>
+  <project pypi="xmlpydict">
+    <title>XML document parser</title>
+    <author>Matthew Taylor</author>
+  </project>
+  <project pypi="blank">
+    <title>Test project</title>
+    <author>Matthew Taylor</author>
+  </project>
+</repository>"""
+    with open(tmp_path / "test.xml", "w") as f:
+        f.write(s)
+
+    assert parse_file(tmp_path / "test.xml") == {
         "repository": {
             "project": [
                 {

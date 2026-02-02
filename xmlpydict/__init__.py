@@ -45,9 +45,9 @@ def parse_file(file_path, attr_prefix: str = "@", cdata_key: str = "#text") -> d
     return handler.item
 
 
-
-def iter_xml_documents(file_path, chunk_size=64 * 1024):
-    start_token = b"<?xml"
+def iter_xml_documents(
+    file_path, chunk_size: int = 64 * 1024, start_token: bytes = b"<?xml"
+):
     buffer = b""
     with open(file_path, "rb") as f:
         while True:
@@ -63,13 +63,27 @@ def iter_xml_documents(file_path, chunk_size=64 * 1024):
                     break
                 yield buffer[:start_index]
                 buffer = buffer[start_index:]
-            
-            
 
-def parse_xml_collections(file_path, attr_prefix: str = "@", cdata_key: str = "#text"):
-    for xml_content in iter_xml_documents(file_path):
+
+def parse_xml_collections(
+    file_path,
+    attr_prefix: str = "@",
+    cdata_key: str = "#text",
+    start_token: bytes = b"<?xml",
+):
+    """
+    Parse collections of xml documents based on a delimeter start_token
+
+    Args:
+        file_path: The path to the XML file to be parsed.
+        attr_prefix: The prefix to use for attributes in the resulting dictionary.
+        cdata_key: The key to use for character data in the resulting dictionary.
+        start_token: The byte sequence that delimits the start of each XML document.
+
+    Returns:
+        A generator yielding dictionaries representing each XML document in the collection.
+    """
+    for xml_content in iter_xml_documents(file_path, start_token=start_token):
         yield parse(
-            xml_content.decode("utf-8"),
-            attr_prefix=attr_prefix,
-            cdata_key=cdata_key
+            xml_content.decode("utf-8"), attr_prefix=attr_prefix, cdata_key=cdata_key
         )
