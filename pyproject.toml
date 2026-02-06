@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xmlpydict"
-version = "0.0.13"
+version = "0.0.14"
 description="xml to dictionary tool for python"
 authors = [
     {name = "Matthew Taylor", email = "matthew.taylor.andre@gmail.com"},

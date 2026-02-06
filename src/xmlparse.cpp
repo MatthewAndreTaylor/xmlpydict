@@ -6,7 +6,7 @@
 #include <cctype>
 #include <vector>
 
-static PyObject* strip(PyObject* s_obj) {
+static inline PyObject* strip(PyObject* s_obj) {
     Py_ssize_t start = 0;
     Py_ssize_t end = PyUnicode_GetLength(s_obj);
     while (start < end && std::isspace(PyUnicode_ReadChar(s_obj, start))) {
@@ -85,7 +85,7 @@ static PyObject* startElement(PyDictHandler* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
-static PyObject* updateChildren(PyObject*& target, PyObject* key, PyObject* value) {
+static inline PyObject* updateChildren(PyObject*& target, PyObject* key, PyObject* value) {
     if (target == Py_None) {
         target = PyDict_New();
     }

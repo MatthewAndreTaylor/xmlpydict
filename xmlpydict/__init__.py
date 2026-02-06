@@ -1,4 +1,7 @@
-from pyxmlhandler import _PyDictHandler
+try:
+    from pyxmlhandler import _PyDictHandler
+except ImportError:
+    from .core import NativePyDictHandler as _PyDictHandler
 from xml.parsers import expat
 
 
