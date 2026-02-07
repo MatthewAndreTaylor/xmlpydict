@@ -2,6 +2,10 @@
 
 
 class NativePyDictHandler:
+    """
+    Handler class for parsing XML content into a Python dictionary using the expat parser.
+    """
+    
     def __init__(
         self,
         attr_prefix: str = "@",

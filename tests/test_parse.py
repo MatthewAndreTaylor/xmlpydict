@@ -7,6 +7,7 @@ def test_simple():
     assert parse("<p/>") == {"p": None}
     assert parse("<p></p>") == {"p": None}
     assert parse('<p width="10"></p>') == {"p": {"@width": "10"}}
+    assert parse('<p width="10"></p>', attr_prefix="$") == {"p": {"$width": "10"}}
     assert parse("<p>Hello</p>") == {"p": "Hello"}
 
     assert parse('<p width="10">Hello World</p>') == {

@@ -119,10 +119,10 @@ static PyObject* endElement(PyDictHandler* self, PyObject* name_obj) {
         self->data_stack.pop_back();
 
         if (temp_item != Py_None) {
+            temp_item = PyDict_Copy(temp_item);
             if (has_data) {
                 PyDict_SetItem(temp_item, self->cdata_key, py_data);
             }
-            temp_item = PyDict_Copy(temp_item);
             self->item = updateChildren(self->item, name_obj, temp_item);
         }
         else {
@@ -151,8 +151,8 @@ static PyGetSetDef PyDictHandler_getset[] = {
     {
         "item",                                   /* name */
         (getter)PyDictHandler_get_item,           /* get */
-        NULL,           /* set */
-        NULL,                    /* doc */
+        NULL,                                     /* set */
+        NULL,                                     /* doc */
         NULL                                      /* closure */
     },
     {NULL}  /* Sentinel */
@@ -178,7 +178,7 @@ static PyTypeObject PyDictHandlerType = {
     0,                                                        // tp_getattro
     0,                                                        // tp_setattro
     0,                                                        // tp_as_buffer
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                // tp_flags
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                 // tp_flags
     "Handler that converts XML to Python dict",               // tp_doc
     0,                                                        // tp_traverse
     0,                                                        // tp_clear
