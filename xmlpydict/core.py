@@ -13,9 +13,7 @@ class NativePyDictHandler:
     ):
         self.attr_prefix = attr_prefix
         self.cdata_key = cdata_key
-
         self.item = None
-        # Use list instead of string as in cpp version for efficiency
         self.data = []
         self.item_stack = []
         self.data_stack = []

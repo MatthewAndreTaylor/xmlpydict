@@ -1,62 +1,54 @@
-cdef object _MISSING = object()
+# cython: boundscheck=False, wraparound=False, always_allow_keywords=False, binding=False, language_level=3, auto_pickle=False
 
-cdef dict _update_children(dict target, str key, object value):
-    cdef object existing
-    existing = target.get(key, _MISSING)
-
-    if existing is _MISSING:
-        target[key] = value
-    elif type(existing) is list:
-        existing.append(value)
-    else:
-        target[key] = [existing, value]
-
-    return target
-
+from cpython.dict cimport PyDict_GetItemWithError
+from cpython.ref cimport PyObject
 
 cdef class _PyDictHandler:
-    """
-    Handler class for parsing XML content into a Python dictionary using the expat parser.
-    """
-    
-    cdef public dict item
+    cdef readonly dict item
     cdef list _data
-    cdef list item_stack
-    cdef list data_stack
-    cdef str attr_prefix
-    cdef str cdata_key
+    cdef list stack
+    cdef str attr_prefix, cdata_key
 
     def __cinit__(
         self,
         attr_prefix: str = "@",
         cdata_key: str = "#text",
+        /,
     ):
         self.attr_prefix = attr_prefix
         self.cdata_key = cdata_key
         self.item = {}
         self._data = []
-        self.item_stack = []
-        self.data_stack = []
+        self.stack = []
 
-    cpdef void characters(self, str data):
+    def characters(self, data):
         self._data.append(data)
 
-    cpdef void startElement(self, str name, dict attrs):
-        self.item_stack.append(self.item)
-        self.data_stack.append(self._data)
+    def startElement(self, name, dict attrs, /):
+        self.stack.append(self.item)
+        self.stack.append(self._data)
         self._data = []
-        self.item = {self.attr_prefix + k: v for k, v in attrs.items()}
+        self.item = {self.attr_prefix + k: v for k, v in attrs.items()} if attrs else {}
                 
-    cpdef void endElement(self, str name):
-        if self.data_stack:
-            py_data = "".join(self._data).strip() or None
-            temp_item = self.item
-            self.item = self.item_stack.pop()
-            self._data = self.data_stack.pop()
+    def endElement(self, name):
+        if not self.stack:
+            return
+        
+        text = "".join(self._data).strip() or None
+        item = self.item
+        self._data = self.stack.pop()
+        self.item = self.stack.pop()
 
-            if temp_item:
-                if py_data:
-                    temp_item[self.cdata_key] = py_data
-                self.item = _update_children(self.item, name, temp_item)
-            else:
-                self.item = _update_children(self.item, name, py_data)
+        if item and text:
+            item[self.cdata_key] = text
+        value = item or text
+
+        cdef PyObject* existing
+        existing = PyDict_GetItemWithError(self.item, name)
+
+        if existing == NULL:
+            self.item[name] = value
+        elif type(<object>existing) is list:
+            (<list>existing).append(value)
+        else:
+            self.item[name] = [<object>existing, value]

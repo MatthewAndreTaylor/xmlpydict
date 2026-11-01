@@ -1,5 +1,5 @@
 import random
-import time
+import timeit
 import statistics
 import matplotlib.pyplot as plt
 import xmltodict
@@ -32,8 +32,8 @@ ITERATIONS = 20
 TRIALS = 10
 
 parsers = [
-    ("xmlpydict", lambda s: xmlpydict.parse(s)),
-    ("xmltodict", lambda s: xmltodict.parse(s)),
+    ("xmlpydict", xmlpydict.parse),
+    ("xmltodict", xmltodict.parse),
 ]
 
 
@@ -45,12 +45,9 @@ def benchmark(xml_string):
         random.shuffle(funcs)
 
         for name, fn in funcs:
-            start = time.perf_counter()
-            for _ in range(ITERATIONS):
-                fn(xml_string)
-            elapsed = time.perf_counter() - start
-            results[name].append(elapsed)
-
+            results[name].append(
+                timeit.timeit(lambda: fn(xml_string), number=ITERATIONS)
+            )
     return results
 
 

@@ -4,16 +4,12 @@
 [![PyPI versions](https://img.shields.io/badge/python-3.8%2B-blue)](https://github.com/MatthewAndreTaylor/xml-to-pydict)
 [![PyPI](https://img.shields.io/pypi/v/xmlpydict.svg)](https://pypi.org/project/xmlpydict/)
 
-## Requirements
-
-- `python 3.8+`
-
 ## Installation
 
-To install xmlpydict, using pip:
+To install xmlpydict, using [uv](https://docs.astral.sh/uv):
 
 ```bash
-pip install xmlpydict
+uv pip install xmlpydict
 ```
 
 ## Quickstart
@@ -30,19 +26,10 @@ pip install xmlpydict
 
 Create a consistent parsing strategy between XML and Python dictionaries using the specification found [here](https://www.xml.com/pub/a/2006/05/31/converting-between-xml-and-json.html). `xmlpydict` focuses on speed; see the benchmarks below.
 
+```uv run --extra benchmark benchmark.py```
+
 <img width="400" alt="small_xml_document" src="https://github.com/user-attachments/assets/0248a408-6bb6-4790-bd0f-f90537e2f21a" />
 <img width="400" alt="large_xml_document" src="https://github.com/user-attachments/assets/539a2a69-f475-46a5-bffc-1e8805a5a5e7" />
-
-
-### xmlpydict supports the following 
-
-[CDataSection](https://www.w3.org/TR/xml/#sec-cdata-sect):  CDATA Sections are stored as {'#text': CData}.
-
-[Comments](https://www.w3.org/TR/xml/#sec-comments):  Comments are tokenized for corectness, but have no effect in what is returned.
-
-[Element Tags](https://www.w3.org/TR/xml/#sec-starttags):  Allows for duplicate attributes, however only the latest defined will be taken. 
-
-[Characters](https://www.w3.org/TR/xml/#charsets):  Similar to CDATA text is stored as {'#text': Char} , however this text is stripped.
 
 ```py
 # Empty tags are containers
@@ -73,12 +60,3 @@ None
 >>> parse("<a></ a>")
 xml.parsers.expat.ExpatError: not well-formed (invalid token): line 1, column 5
 ```
-
-
-### Unsupported
-
-Prolog / Enforcing Document Type Definition and Element Type Declarations
-
-Entity Referencing
-
-Namespaces

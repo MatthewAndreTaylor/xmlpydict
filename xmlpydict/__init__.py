@@ -17,8 +17,9 @@ def parse(xml_content, attr_prefix: str = "@", cdata_key: str = "#text") -> dict
     Returns:
         A dictionary representation of the XML content.
     """
-    handler = _PyDictHandler(attr_prefix=attr_prefix, cdata_key=cdata_key)
+    handler = _PyDictHandler(attr_prefix, cdata_key)
     parser = expat.ParserCreate()
+    parser.buffer_text = True
     parser.CharacterDataHandler = handler.characters
     parser.StartElementHandler = handler.startElement
     parser.EndElementHandler = handler.endElement
@@ -38,8 +39,9 @@ def parse_file(file_path, attr_prefix: str = "@", cdata_key: str = "#text") -> d
     Returns:
         A dictionary representation of the XML file content.
     """
-    handler = _PyDictHandler(attr_prefix=attr_prefix, cdata_key=cdata_key)
+    handler = _PyDictHandler(attr_prefix, cdata_key)
     parser = expat.ParserCreate()
+    parser.buffer_text = True
     parser.CharacterDataHandler = handler.characters
     parser.StartElementHandler = handler.startElement
     parser.EndElementHandler = handler.endElement
@@ -49,7 +51,7 @@ def parse_file(file_path, attr_prefix: str = "@", cdata_key: str = "#text") -> d
 
 
 def pydict_parser(attr_prefix: str = "@", cdata_key: str = "#text"):
-    handler = _PyDictHandler(attr_prefix=attr_prefix, cdata_key=cdata_key)
+    handler = _PyDictHandler(attr_prefix, cdata_key)
     parser = expat.ParserCreate()
     parser.buffer_text = True
     parser.CharacterDataHandler = handler.characters
@@ -77,7 +79,7 @@ def parse_xml_archive(
     Returns:
         A generator yielding dictionaries representing each XML document in the collection.
     """
-    handler, parser = pydict_parser(attr_prefix=attr_prefix, cdata_key=cdata_key)
+    handler, parser = pydict_parser(attr_prefix, cdata_key)
     buffer = bytearray()
 
     while True:
